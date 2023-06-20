@@ -1,0 +1,59 @@
+---
+editor_options: 
+  markdown: 
+    wrap: 72
+---
+
+```{r setup, include=FALSE}
+library(arrow) 
+library(tidyverse) 
+library(parallel) 
+library(mice)
+library(doParallel)
+library(mice)
+
+registerDoParallel(cores=8)
+
+dirpath <- "F:/MasterImputation/Code/outdata/datasets/test/"
+f <- paste0(dirpath, "mcar_2h_0.1_both_9.parquet")
+knitr::opts_knit$set(root.dir = dirpath)
+files <- list.files(dirpath)
+
+```
+
+```{r parallel}
+foreach(f=files, .packages = c("arrow","tidyverse")) %dopar% {
+  setwd(dirpath)
+  read_parquet(f) %>%
+    select_all(~gsub("\\s", "_", .)) %>% 
+    fill(everything()) %>%
+    write_parquet(., paste0(f, "_ffill"))
+}
+
+
+```
+
+```{r exploring mice}
+mdf <- read_parquet(f) %>%
+  select_all(~gsub("\\s", "_", .))
+  
+
+
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
